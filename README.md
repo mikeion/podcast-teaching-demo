@@ -1,23 +1,29 @@
 # Podcast Teaching Demo
 
-A Next.js application that generates educational podcasts using a hybrid text-to-speech system, supporting both local (CSM-MLX) and cloud-based (ElevenLabs) speech synthesis.
+A Next.js application that generates educational podcasts using a hybrid text-to-speech system, supporting both local (CSM-MLX) and cloud-based (ElevenLabs) speech synthesis. The app analyzes learning goals and generates concise, targeted educational content.
 
 ## Features
 
+- Smart Content Analysis
+  - Analyzes learning goals and project requirements
+  - Generates targeted educational content
+  - Optimizes for 2-3 minute podcast length
 - Hybrid TTS System
-  - Local generation using CSM-MLX (optimized for Apple Silicon)
-  - Cloud-based generation using ElevenLabs
-- Real-time streaming audio
-- Modern React components with TypeScript
-- Tailwind CSS for styling
-- Environment-based configuration
+  - Cloud-based generation using ElevenLabs (Currently Working)
+  - Local generation using CSM-MLX (In Progress - Apple Silicon only)
+- Modern Web Interface
+  - Real-time content analysis
+  - Live audio preview
+  - TTS provider selection
+  - Built with Next.js and TypeScript
+  - Styled with Tailwind CSS
 
 ## Prerequisites
 
 - Node.js 18+ 
 - npm or yarn
-- For local TTS:
-  - Apple Silicon Mac (for CSM-MLX)
+- For local TTS (Coming Soon):
+  - Apple Silicon Mac (M1/M2/M3)
   - Python 3.8+
   - FFmpeg
 
@@ -36,12 +42,14 @@ npm install
 
 3. Create a `.env.local` file in the root directory:
 ```env
-ELEVENLABS_API_KEY=your_api_key_here
+ELEVENLABS_API_KEY=your_elevenlabs_api_key_here
+OPENAI_API_KEY=your_openai_api_key_here
 ```
 
-4. (Optional) For local TTS, install CSM-MLX:
+4. (Optional) For local TTS, run the setup script (Note: Currently in development):
 ```bash
-pip install git+https://github.com/senstella/csm-mlx.git
+chmod +x scripts/setup-csm.sh
+./scripts/setup-csm.sh
 ```
 
 ## Development
@@ -53,6 +61,17 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
+## Known Issues
+
+1. CSM-MLX Integration (In Progress)
+   - The local TTS using CSM-MLX is currently not working due to module resolution issues
+   - Use ElevenLabs TTS in the meantime
+   - Fix coming soon
+
+2. Environment Variables
+   - Both ELEVENLABS_API_KEY and OPENAI_API_KEY are required for full functionality
+   - The app will show appropriate error messages if keys are missing
+
 ## Project Structure
 
 ```
@@ -60,17 +79,21 @@ podcast-teaching-demo/
 ├── src/
 │   ├── app/
 │   │   ├── api/
+│   │   │   ├── analyze/
+│   │   │   │   └── route.ts    # Content analysis endpoint
+│   │   │   ├── generate-content/
+│   │   │   │   └── route.ts    # Educational content generation
 │   │   │   └── tts/
 │   │   │       └── route.ts    # TTS API endpoint
+│   │   ├── layout.tsx          # Root layout
 │   │   └── page.tsx            # Main page
 │   ├── components/
 │   │   └── PodcastGenerator/   # Main podcast generator component
-│   ├── services/
-│   │   └── tts.service.ts      # TTS service implementation
-│   └── types/
-│       └── csm-mlx.d.ts        # Type definitions
-├── public/
-├── .env.local                  # Environment variables (not in repo)
+│   └── services/
+│       └── tts.service.ts      # TTS service implementation
+├── scripts/
+│   └── setup-csm.sh           # CSM-MLX setup script
+├── .env.local                 # Environment variables (not in repo)
 └── package.json
 ```
 
