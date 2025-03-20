@@ -143,11 +143,22 @@ function isNodeProcess(proc: any): proc is { arch: string; platform: string } {
   return proc && typeof proc.arch === 'string' && typeof proc.platform === 'string';
 }
 
+import { OpenAI } from 'openai';
+
+export interface TTSOptions {
+  text: string;
+  voice?: string;
+  model?: string;
+  useLocal?: boolean;
+}
+
 export class TTSService {
+  private openai: OpenAI;
   private localProvider?: TTSProvider;
   private cloudProvider: TTSProvider;
   
   constructor(elevenLabsApiKey: string) {
+    this.openai = new OpenAI({ apiKey: elevenLabsApiKey });
     // Only initialize local provider if on Apple Silicon
     if (this.isAppleSilicon()) {
       this.localProvider = new CSMMLXProvider();
@@ -166,35 +177,32 @@ export class TTSService {
     }
   }
 
-  async generateSpeech(text: string, options: {
-    preferLocal?: boolean;
-    forceCloud?: boolean;
-    quality?: 'high' | 'medium' | 'low';
-  } = {}): Promise<ReadableStream<Uint8Array>> {
-    const useLocal = this.shouldUseLocalProvider(options);
-    
-    if (useLocal && this.localProvider) {
-      try {
-        return await this.localProvider.generateSpeech(text);
-      } catch (error) {
-        console.error('Local TTS failed, falling back to cloud:', error);
-        return this.cloudProvider.generateSpeech(text);
-      }
+  async generateSpeech(options: TTSOptions): Promise<ArrayBuffer> {
+    if (options.useLocal) {
+      return this.generateLocalSpeech(options);
     }
-    
-    return this.cloudProvider.generateSpeech(text);
+    return this.generateCloudSpeech(options);
   }
 
-  private shouldUseLocalProvider(options: {
-    preferLocal?: boolean;
-    forceCloud?: boolean;
-    quality?: 'high' | 'medium' | 'low';
-  }): boolean {
-    if (!this.localProvider) return false;
-    if (options.forceCloud) return false;
-    if (options.preferLocal) return true;
-    if (options.quality === 'high') return false;
-    
-    return true;
+  private async generateCloudSpeech({ text, voice = 'alloy', model = 'tts-1' }: TTSOptions): Promise<ArrayBuffer> {
+    try {
+      const response = await this.openai.audio.speech.create({
+        model,
+        voice,
+        input: text,
+      });
+
+      const arrayBuffer = await response.arrayBuffer();
+      return arrayBuffer;
+    } catch (error) {
+      console.error('Error generating cloud speech:', error);
+      throw error;
+    }
+  }
+
+  private async generateLocalSpeech(options: TTSOptions): Promise<ArrayBuffer> {
+    // TODO: Implement local speech generation using CSM-MLX
+    // This will be implemented once we set up the Python backend
+    throw new Error('Local speech generation not yet implemented');
   }
 } 
