@@ -2,15 +2,19 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(req: NextRequest) {
   try {
-    const { text, useElevenLabs } = await req.json();
+    const { text, useElevenLabs, voiceId, model } = await req.json();
     
     if (!text) {
       return NextResponse.json({ error: 'Text is required' }, { status: 400 });
     }
 
     if (useElevenLabs) {
+      // Define default voice and model if not provided
+      const selectedVoiceId = voiceId || '21m00Tcm4TlvDq8ikWAM'; // Default voice ID
+      const selectedModel = model || 'eleven_multilingual_v2'; // Default to new model
+      
       // Use ElevenLabs API
-      const response = await fetch('https://api.elevenlabs.io/v1/text-to-speech/21m00Tcm4TlvDq8ikWAM', {
+      const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${selectedVoiceId}`, {
         method: 'POST',
         headers: {
           'Accept': 'audio/mpeg',
@@ -19,7 +23,7 @@ export async function POST(req: NextRequest) {
         },
         body: JSON.stringify({
           text,
-          model_id: 'eleven_monolingual_v1',
+          model_id: selectedModel,
           voice_settings: {
             stability: 0.5,
             similarity_boost: 0.75,
@@ -28,7 +32,9 @@ export async function POST(req: NextRequest) {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to generate speech with ElevenLabs');
+        const errorData = await response.json().catch(() => null);
+        console.error('ElevenLabs API error:', errorData);
+        throw new Error(`Failed to generate speech with ElevenLabs: ${response.status}`);
       }
 
       const audioBuffer = await response.arrayBuffer();
@@ -72,4 +78,4 @@ export async function POST(req: NextRequest) {
       { status: 500 }
     );
   }
-} 
+}
