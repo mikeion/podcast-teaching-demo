@@ -1,0 +1,4 @@
+git+https://github.com/senstella/csm-mlx
+numpy
+audiofile
+huggingface_hub 
