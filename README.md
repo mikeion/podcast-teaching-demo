@@ -40,11 +40,14 @@ cd podcast-teaching-demo
 npm install
 ```
 
-3. Create a `.env.local` file in the root directory:
-```env
-ELEVENLABS_API_KEY=your_elevenlabs_api_key_here
-OPENAI_API_KEY=your_openai_api_key_here
-```
+3. Set up environment variables:
+   - Copy `.env.example` to `.env.local`:
+   ```bash
+   cp .env.example .env.local
+   ```
+   - Edit `.env.local` and add your API keys:
+     - `ELEVENLABS_API_KEY`: Your ElevenLabs API key
+     - `OPENAI_API_KEY`: Your OpenAI API key
 
 4. (Optional) For local TTS, run the setup script (Note: Currently in development):
 ```bash
@@ -60,6 +63,17 @@ npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+## Environment Variables
+
+The following environment variables are required:
+
+- `ELEVENLABS_API_KEY`: Your ElevenLabs API key for cloud-based TTS
+- `OPENAI_API_KEY`: Your OpenAI API key for content generation
+
+Optional variables:
+- `NODE_ENV`: Set to 'development' or 'production' (default: 'development')
+- `PORT`: The port number for the development server (default: 3000)
 
 ## Known Issues
 
@@ -93,7 +107,7 @@ podcast-teaching-demo/
 │       └── tts.service.ts      # TTS service implementation
 ├── scripts/
 │   └── setup-csm.sh           # CSM-MLX setup script
-├── .env.local                 # Environment variables (not in repo)
+├── .env.example              # Example environment variables
 └── package.json
 ```
 
